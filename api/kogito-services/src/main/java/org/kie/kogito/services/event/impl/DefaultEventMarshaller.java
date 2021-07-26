@@ -50,4 +50,7 @@ public class DefaultEventMarshaller implements EventMarshaller {
         }
     }
 
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
 }
