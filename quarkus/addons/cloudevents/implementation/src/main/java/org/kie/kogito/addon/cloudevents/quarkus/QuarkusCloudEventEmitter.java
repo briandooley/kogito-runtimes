@@ -27,8 +27,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
-import org.kie.kogito.addon.cloudevents.quarkus.decorators.MessageDecorator;
-import org.kie.kogito.addon.cloudevents.quarkus.decorators.MessageDecoratorFactory;
+import org.kie.kogito.addon.cloudevents.quarkus.message.MessageFactory;
 import org.kie.kogito.conf.ConfigBean;
 import org.kie.kogito.event.EventEmitter;
 import org.kie.kogito.event.EventMarshaller;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class QuarkusCloudEventEmitter implements EventEmitter {
 
-    private MessageDecorator messageDecorator;
+    private MessageFactory messageFactory;
 
     private static final Logger logger = LoggerFactory.getLogger(QuarkusCloudEventEmitter.class);
 
@@ -63,13 +62,13 @@ public class QuarkusCloudEventEmitter implements EventEmitter {
     @PostConstruct
     private void init() {
         marshaller = marshallerInstance.isResolvable() ? marshallerInstance.get() : new DefaultEventMarshaller();
-        messageDecorator = MessageDecoratorFactory.newInstance(configBean.useCloudEvents());
+        messageFactory = new MessageFactory(configBean.useCloudEvents());
     }
 
     @Override
     public <T> CompletionStage<Void> emit(T e, String type, Optional<Function<T, Object>> processDecorator) {
         logger.debug("publishing event {} for type {}", e, type);
-        final Message<String> message = this.messageDecorator.decorate(marshaller.marshall(
+        final Message<String> message = this.messageFactory.build(marshaller.marshall(
                 configBean.useCloudEvents() ? processDecorator.map(d -> d.apply(e)).orElse(e) : e));
         emitter.send(message);
         return message.getAck().get();
