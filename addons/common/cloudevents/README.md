@@ -1,4 +1,4 @@
-# Kogito CloudEvents Addon
+# Kogito CloudEvents Add-on
 
 Use this addon to make the events produced and consumed by a Kogito project accept
 the [CloudEvents](https://cloudevents.io) format. There are many use cases where you can use this addon.
